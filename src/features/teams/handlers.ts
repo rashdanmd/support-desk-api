@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { getTeams } from "../services/team-service";
+import { getTeams } from "./service.js";
 
 export const getTeamsHandler = async (
   _req: Request,
