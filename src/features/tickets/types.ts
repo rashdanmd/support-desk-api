@@ -12,21 +12,26 @@ export type Ticket = {
   id: number;
   title: string;
   description: string;
-  teamId: number;
-  affectedUrl: string | null;
+  team_id: number;
+  affected_url: string | null;
   curl: string | null;
   priority: TicketPriority;
   status: TicketStatus;
-  createdBy: string;
-  assignedTo: string | null;
+  created_by: string;
+  assigned_to: string | null;
   resolution: string | null;
-  referredTo: string | null;
-  referralMessage: string | null;
-  createdAt: string;
-  updatedAt: string;
-  resolvedAt: string | null;
-  closedAt: string | null;
-  cancelledAt: string | null;
+  referred_to: string | null;
+  referral_message: string | null;
+  created_at: string;
+  updated_at: string;
+  resolved_at: string | null;
+  closed_at: string | null;
+  cancelled_at: string | null;
+
+  creator: {
+    id: string;
+    display_name: string;
+  };
 };
 
 export type CreateTicketData = {

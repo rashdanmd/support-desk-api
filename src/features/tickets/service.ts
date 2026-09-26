@@ -1,5 +1,5 @@
 import { supabase } from "../../config/supabase";
-import { CreateTicketData } from "./types";
+import { CreateTicketData, Ticket } from "./types";
 
 export const getTickets = async () => {
   const { data, error } = await supabase
@@ -14,10 +14,18 @@ export const getTickets = async () => {
   return data;
 };
 
-export const getTicketById = async (id: number) => {
+export const getTicketById = async (id: number): Promise<Ticket> => {
   const { data, error } = await supabase
     .from("tickets")
-    .select("*")
+    .select(
+      `
+      *,
+      creator:profiles!tickets_created_by_fkey (
+        id,
+        display_name
+      )
+    `,
+    )
     .eq("id", id)
     .single();
 
