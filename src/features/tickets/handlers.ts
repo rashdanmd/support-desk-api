@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../../types/auth";
-import { createTicket, getTickets } from "./service";
+import { createTicket, getTicketById, getTickets } from "./service";
 
 export const getTicketsHandler = async (
   _req: Request,
@@ -45,6 +45,25 @@ export const createTicketHandler = async (
 
     res.status(500).json({
       message: "Failed to create ticket",
+    });
+  }
+};
+
+export const getTicketByIdHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const id = Number(req.params.id);
+
+    const ticket = await getTicketById(id);
+
+    res.json(ticket);
+  } catch (error) {
+    console.error("Failed to get ticket:", error);
+
+    res.status(500).json({
+      message: "Failed to get ticket",
     });
   }
 };
