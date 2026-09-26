@@ -4,7 +4,15 @@ import { CreateTicketData, Ticket } from "./types";
 export const getTickets = async () => {
   const { data, error } = await supabase
     .from("tickets")
-    .select("*")
+    .select(
+      `
+      *,
+      creator:profiles!tickets_created_by_fkey (
+        id,
+        display_name
+      )
+    `,
+    )
     .order("created_at", { ascending: false });
 
   if (error) {
