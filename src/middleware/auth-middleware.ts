@@ -30,7 +30,23 @@ export const requireAuth = async (
     return;
   }
 
-  (req as AuthenticatedRequest).user = user;
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profileError || !profile) {
+    res.status(401).json({
+      message: "User profile not found",
+    });
+    return;
+  }
+
+  const authenticatedRequest = req as AuthenticatedRequest;
+
+  authenticatedRequest.user = user;
+  authenticatedRequest.role = profile.role;
 
   next();
 };

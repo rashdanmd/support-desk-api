@@ -48,9 +48,14 @@ export const createTicketResponseHandler = async (
 
     const ticket = await getTicketById(ticketId);
 
-    if (ticket.created_by !== authenticatedRequest.user.id) {
+    const canRespond =
+      ticket.created_by === authenticatedRequest.user.id ||
+      authenticatedRequest.role === "support" ||
+      authenticatedRequest.role === "admin";
+
+    if (!canRespond) {
       res.status(403).json({
-        message: "You can only respond to your own tickets",
+        message: "You do not have permission to respond to this ticket",
       });
       return;
     }

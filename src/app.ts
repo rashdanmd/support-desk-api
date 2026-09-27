@@ -3,6 +3,7 @@ import cors from "cors";
 import teamRoutes from "./features/teams/routes";
 import ticketRoutes from "./features/tickets/routes";
 import responseRoutes from "./features/responses/routes";
+import userRoutes from "./features/users/routes";
 
 const app = express();
 
@@ -18,5 +19,6 @@ app.get("/health", (_req, res) => {
 app.use("/api/teams", teamRoutes);
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/tickets", responseRoutes);
+app.use("/api/users", userRoutes);
 
 export default app;
