@@ -56,6 +56,11 @@ export const getTicketByIdHandler = async (
   try {
     const id = Number(req.params.id);
 
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Invalid ticket ID" });
+      return;
+    }
+
     const ticket = await getTicketById(id);
 
     res.json(ticket);
