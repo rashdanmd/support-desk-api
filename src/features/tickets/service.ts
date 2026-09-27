@@ -10,6 +10,10 @@ export const getTickets = async () => {
       creator:profiles!tickets_created_by_fkey (
         id,
         display_name
+      ),
+      team:teams!tickets_team_id_fkey (
+        id,
+        name
       )
     `,
     )
@@ -31,6 +35,10 @@ export const getTicketById = async (id: number): Promise<Ticket> => {
       creator:profiles!tickets_created_by_fkey (
         id,
         display_name
+      ),
+      team:teams!tickets_team_id_fkey (
+        id,
+        name
       )
     `,
     )
