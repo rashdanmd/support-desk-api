@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../../types/auth";
 import {
+  cancelTicket,
   createTicket,
   getTicketById,
   getTickets,
@@ -115,6 +116,46 @@ export const updateTicketHandler = async (
 
     res.status(500).json({
       message: "Failed to update ticket",
+    });
+  }
+};
+
+export const cancelTicketHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const authenticatedRequest = req as AuthenticatedRequest;
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Invalid ticket ID" });
+      return;
+    }
+
+    const ticket = await getTicketById(id);
+
+    if (ticket.created_by !== authenticatedRequest.user.id) {
+      res.status(403).json({
+        message: "You can only cancel your own tickets",
+      });
+      return;
+    }
+
+    if (ticket.status !== "pending") {
+      res.status(400).json({
+        message: "Only pending tickets can be cancelled",
+      });
+      return;
+    }
+
+    const cancelledTicket = await cancelTicket(id);
+
+    res.json(cancelledTicket);
+  } catch (error) {
+    console.error("Failed to cancel ticket:", error);
+    res.status(500).json({
+      message: "Failed to cancel ticket",
     });
   }
 };

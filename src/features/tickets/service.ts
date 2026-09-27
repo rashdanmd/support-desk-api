@@ -116,3 +116,33 @@ export const updateTicket = async (
 
   return data;
 };
+
+export const cancelTicket = async (id: number): Promise<Ticket> => {
+  const { data, error } = await supabase
+    .from("tickets")
+    .update({
+      status: "cancelled",
+      cancelled_at: new Date().toISOString(),
+    })
+    .eq("id", id)
+    .select(
+      `
+      *,
+      creator:profiles!tickets_created_by_fkey (
+        id,
+        display_name
+      ),
+      team:teams!tickets_team_id_fkey (
+        id,
+        name
+      )
+    `,
+    )
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+};
