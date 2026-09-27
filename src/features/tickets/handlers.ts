@@ -6,6 +6,10 @@ import {
   getTicketById,
   getTickets,
   updateTicket,
+  startTicketReview,
+  referTicket,
+  resolveTicket,
+  deleteTicket,
 } from "./service";
 
 export const getTicketsHandler = async (
@@ -156,6 +160,203 @@ export const cancelTicketHandler = async (
     console.error("Failed to cancel ticket:", error);
     res.status(500).json({
       message: "Failed to cancel ticket",
+    });
+  }
+};
+
+export const startTicketReviewHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const authenticatedRequest = req as AuthenticatedRequest;
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      res.status(400).json({
+        message: "Invalid ticket ID",
+      });
+      return;
+    }
+
+    const canManage =
+      authenticatedRequest.role === "support" ||
+      authenticatedRequest.role === "admin";
+
+    if (!canManage) {
+      res.status(403).json({
+        message: "You do not have permission to manage this ticket",
+      });
+      return;
+    }
+
+    const ticket = await getTicketById(id);
+
+    if (ticket.status !== "pending") {
+      res.status(400).json({
+        message: "Only pending tickets can be moved into review",
+      });
+      return;
+    }
+
+    const updatedTicket = await startTicketReview(id);
+
+    res.json(updatedTicket);
+  } catch (error) {
+    console.error("Failed to start ticket review:", error);
+
+    res.status(500).json({
+      message: "Failed to start ticket review",
+    });
+  }
+};
+
+export const referTicketHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const authenticatedRequest = req as AuthenticatedRequest;
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      res.status(400).json({
+        message: "Invalid ticket ID",
+      });
+      return;
+    }
+
+    const canManage =
+      authenticatedRequest.role === "support" ||
+      authenticatedRequest.role === "admin";
+
+    if (!canManage) {
+      res.status(403).json({
+        message: "You do not have permission to manage this ticket",
+      });
+      return;
+    }
+
+    const ticket = await getTicketById(id);
+
+    if (ticket.status !== "in_review") {
+      res.status(400).json({
+        message: "Only tickets in review can be referred",
+      });
+      return;
+    }
+
+    const { message } = req.body;
+
+    if (!message?.trim()) {
+      res.status(400).json({
+        message: "Referral message is required",
+      });
+      return;
+    }
+
+    const updatedTicket = await referTicket(id, {
+      message: message.trim(),
+    });
+
+    res.json(updatedTicket);
+  } catch (error) {
+    console.error("Failed to refer ticket:", error);
+
+    res.status(500).json({
+      message: "Failed to refer ticket",
+    });
+  }
+};
+
+export const resolveTicketHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const authenticatedRequest = req as AuthenticatedRequest;
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      res.status(400).json({
+        message: "Invalid ticket ID",
+      });
+      return;
+    }
+
+    const canManage =
+      authenticatedRequest.role === "support" ||
+      authenticatedRequest.role === "admin";
+
+    if (!canManage) {
+      res.status(403).json({
+        message: "You do not have permission to manage this ticket",
+      });
+      return;
+    }
+
+    const ticket = await getTicketById(id);
+
+    if (ticket.status !== "in_review") {
+      res.status(400).json({
+        message: "Only tickets in review can be resolved",
+      });
+      return;
+    }
+
+    const { resolution } = req.body;
+
+    if (!resolution?.trim()) {
+      res.status(400).json({
+        message: "Resolution is required",
+      });
+      return;
+    }
+
+    const updatedTicket = await resolveTicket(id, {
+      resolution: resolution.trim(),
+    });
+
+    res.json(updatedTicket);
+  } catch (error) {
+    console.error("Failed to resolve ticket:", error);
+
+    res.status(500).json({
+      message: "Failed to resolve ticket",
+    });
+  }
+};
+
+export const deleteTicketHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const authenticatedRequest = req as AuthenticatedRequest;
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      res.status(400).json({
+        message: "Invalid ticket ID",
+      });
+      return;
+    }
+
+    if (authenticatedRequest.role !== "admin") {
+      res.status(403).json({
+        message: "Only admins can delete tickets",
+      });
+      return;
+    }
+
+    await deleteTicket(id);
+
+    res.status(204).send();
+  } catch (error) {
+    console.error("Failed to delete ticket:", error);
+
+    res.status(500).json({
+      message: "Failed to delete ticket",
     });
   }
 };
