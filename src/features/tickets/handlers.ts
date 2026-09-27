@@ -1,6 +1,11 @@
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../../types/auth";
-import { createTicket, getTicketById, getTickets } from "./service";
+import {
+  createTicket,
+  getTicketById,
+  getTickets,
+  updateTicket,
+} from "./service";
 
 export const getTicketsHandler = async (
   _req: Request,
@@ -69,6 +74,47 @@ export const getTicketByIdHandler = async (
 
     res.status(500).json({
       message: "Failed to get ticket",
+    });
+  }
+};
+
+export const updateTicketHandler = async (
+  req: Request,
+  res: Response,
+): Promise<void> => {
+  try {
+    const authenticatedRequest = req as AuthenticatedRequest;
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      res.status(400).json({ message: "Invalid ticket ID" });
+      return;
+    }
+
+    const ticket = await getTicketById(id);
+
+    if (ticket.created_by !== authenticatedRequest.user.id) {
+      res.status(403).json({
+        message: "You can only edit your own tickets",
+      });
+      return;
+    }
+
+    if (ticket.status !== "pending") {
+      res.status(400).json({
+        message: "Only pending tickets can be edited",
+      });
+      return;
+    }
+
+    const updatedTicket = await updateTicket(id, req.body);
+
+    res.json(updatedTicket);
+  } catch (error) {
+    console.error("Failed to update ticket:", error);
+
+    res.status(500).json({
+      message: "Failed to update ticket",
     });
   }
 };

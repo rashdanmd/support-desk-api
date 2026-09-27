@@ -48,3 +48,12 @@ export type CreateTicketData = {
   priority?: TicketPriority;
   createdBy: string;
 };
+
+export type UpdateTicketData = {
+  title?: string;
+  description?: string;
+  teamId?: number;
+  affectedUrl?: string;
+  curl?: string;
+  priority?: TicketPriority;
+};

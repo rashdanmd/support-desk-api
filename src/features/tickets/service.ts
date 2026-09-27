@@ -1,5 +1,5 @@
 import { supabase } from "../../config/supabase";
-import { CreateTicketData, Ticket } from "./types";
+import { CreateTicketData, Ticket, UpdateTicketData } from "./types";
 
 export const getTickets = async () => {
   const { data, error } = await supabase
@@ -78,6 +78,41 @@ export const createTicket = async ({
   if (error) {
     throw error;
   }
+
+  return data;
+};
+
+export const updateTicket = async (
+  id: number,
+  updates: UpdateTicketData,
+): Promise<Ticket> => {
+  const { data, error } = await supabase
+    .from("tickets")
+    .update({
+      title: updates.title,
+      description: updates.description,
+      team_id: updates.teamId,
+      affected_url: updates.affectedUrl,
+      curl: updates.curl,
+      priority: updates.priority,
+    })
+    .eq("id", id)
+    .select(
+      `
+      *,
+      creator:profiles!tickets_created_by_fkey (
+        id,
+        display_name
+      ),
+      team:teams!tickets_team_id_fkey (
+        id,
+        name
+      )
+    `,
+    )
+    .single();
+
+  if (error) throw error;
 
   return data;
 };
